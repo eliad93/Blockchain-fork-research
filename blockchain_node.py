@@ -1,3 +1,5 @@
+import numpy as np
+
 from blockchain_data_structures import Block
 from events import BlockCreation, BlockArrival
 
@@ -12,8 +14,12 @@ class Node:
         self.block_chain = genesis_block
         self.node_id = node_id
 
+        self.current_epoch = 0
+        self.last_created_block_event = None
+
     def time_until_next_block(self):
-        return 1
+        beta = 1. / (self.power * self.difficulty)
+        return np.random.exponential(scale=beta)
 
     def create_block(self, timestamp):
         new_block = Block(self.block_chain, timestamp, self.node_id)
@@ -22,17 +28,20 @@ class Node:
 
     def handle_block_arrival(self, block):
         # todo: timestamp matters?
-        # todo: handle epoch
         if block.block_index > self.block_chain.block_index:
             self.block_chain = block
+            self.last_created_block_event.handle_event_flag = False
+            return True
+        return False
 
     def generate_block_creation_event(self, global_time):
         delta = self.time_until_next_block()
         block_creation = BlockCreation(global_time + delta, self.node_id)
+        self.last_created_block_event = block_creation
         return block_creation
 
-    def send_block(self, global_time, block):
-        block_arrivals = [BlockArrival(global_time + propagation_time,
+    def send_block(self, creation_time, block):
+        block_arrivals = [BlockArrival(creation_time + propagation_time,
                                        self.node_id, n.node_id, block)
                           for n, propagation_time in self.neighbors]
         return block_arrivals

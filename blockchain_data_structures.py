@@ -1,4 +1,3 @@
-
 class Block:
 
     def __init__(self, prev_block, timestamp, owner_id):
@@ -6,4 +5,3 @@ class Block:
         self.prev_block = prev_block
         self.timestamp = timestamp
         self.owner_id = owner_id
-
