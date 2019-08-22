@@ -19,6 +19,7 @@ class BlockCreation(SystemEvent):
 
 class BlockArrival(SystemEvent):
 
-    def __init__(self, timestamp, node_id, receiver_node_id):
+    def __init__(self, timestamp, node_id, receiver_node_id, block):
         super().__init__(timestamp, node_id)
         self.receiver_node_id = receiver_node_id
+        self.block = block
