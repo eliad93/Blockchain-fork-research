@@ -7,7 +7,7 @@ from events import BlockCreation, BlockArrival
 class Node:
 
     def __init__(self, power, neighbors, difficulty, genesis_block,
-                 node_id):
+                 node_id, blocks_per_epoch, target_block_creation_rate):
         self.power = power
         self.neighbors = neighbors
         self.difficulty = difficulty
@@ -16,6 +16,8 @@ class Node:
 
         self.current_epoch = 0
         self.last_created_block_event = None
+        self.blocks_per_epoch = blocks_per_epoch
+        self.target_block_creation_rate = target_block_creation_rate
 
     def time_until_next_block(self):
         beta = 1. / (self.power * self.difficulty)
@@ -51,3 +53,12 @@ class Node:
         while b.block_index != 0:
             print(b.block_index)
             b = b.prev_block
+
+    def check_difficulty_update(self):
+        current_epoch = self.block_chain.block_index // self.blocks_per_epoch
+        if current_epoch > self.current_epoch:
+            chains_block_creation_rate = self.block_chain.timestamp / self.block_chain.block_index
+            update_factor = self.target_block_creation_rate / chains_block_creation_rate
+            new_difficulty = self.difficulty * update_factor
+            self.difficulty = new_difficulty
+            self.current_epoch = current_epoch

@@ -28,7 +28,7 @@ class System:
                 self._send_block_to_neighbors(creator_node, new_block)
                 new_block_creation_event = creator_node.generate_block_creation_event(self.global_time)
                 self.events_queue.put(new_block_creation_event)
-                self._check_difficulty_update(creator_node)
+                creator_node.check_difficulty_update()
             else:
                 assert isinstance(next_event, BlockArrival)
                 receiver_node = self.nodes[next_event.receiver_node_id]
@@ -36,7 +36,7 @@ class System:
                     self._send_block_to_neighbors(receiver_node, next_event.block)
                     new_block_creation_event = receiver_node.generate_block_creation_event(self.global_time)
                     self.events_queue.put(new_block_creation_event)
-                    self._check_difficulty_update(receiver_node)
+                    receiver_node.check_difficulty_update()
 
     def _send_block_to_neighbors(self, sender_node, block):
         block_arrivals = sender_node.send_block(self.global_time, block)
@@ -45,7 +45,9 @@ class System:
 
     def _create_system_nodes(self, p):
         initial_difficulty = 1. / (sum(p.power_list) * p.target_block_creation_rate)
-        nodes_list = [Node(p.power_list[i], [], initial_difficulty, self.genesis_block, i)
+        nodes_list = [Node(p.power_list[i], [], initial_difficulty, self.genesis_block, i,
+                           self.system_static_properties.blocks_per_epoch,
+                           self.system_static_properties.target_block_creation_rate)
                       for i in range(p.number_of_nodes)]
         for node in nodes_list:
             for other_node in nodes_list:
@@ -53,15 +55,6 @@ class System:
                     propagation_time = p.adjacency_matrix[node.node_id][other_node.node_id]
                     node.neighbors.append((other_node, propagation_time))
         return nodes_list
-
-    def _check_difficulty_update(self, node):
-        current_epoch = node.block_chain.block_index // self.system_static_properties.blocks_per_epoch
-        if current_epoch > node.current_epoch:
-            chains_block_creation_rate = node.block_chain.timestamp / node.block_chain.block_index
-            update_factor = self.system_static_properties.target_block_creation_rate / chains_block_creation_rate
-            new_difficulty = node.difficulty * update_factor
-            node.difficulty = new_difficulty
-            node.current_epoch = current_epoch
 
     def _generate_block_creation_events(self):
         block_creations = [node.generate_block_creation_event(self.global_time)
