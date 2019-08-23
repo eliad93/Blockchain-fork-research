@@ -26,27 +26,27 @@ class Node:
     def create_block(self, timestamp):
         new_block = Block(self.block_chain, timestamp, self.node_id)
         self.block_chain = new_block
-        block_arrivals = self._send_block_to_neighbors(new_block)
-        # todo: is time correct?
+        block_arrivals = self._send_block_to_neighbors(new_block, timestamp)
         new_block_creation_event = self.generate_block_creation_event(timestamp)
         self.check_difficulty_update()
         return new_block_creation_event, block_arrivals
 
-    def _send_block_to_neighbors(self, block):
-        # todo: is time correct?
-        block_arrivals = [BlockArrival(block.timestamp + propagation_time,
+    def _send_block_to_neighbors(self, block, timestamp):
+        block_arrivals = [BlockArrival(timestamp + propagation_time,
                                        self.node_id, n.node_id, block)
                           for n, propagation_time in self.neighbors]
         return block_arrivals
 
-    def handle_block_arrival(self, block):
+    def handle_block_arrival(self, block_arrival_event):
         # todo: timestamp matters?
+        block = block_arrival_event.block
+        timestamp = block_arrival_event.timestamp
         if block.block_index > self.block_chain.block_index:
             self.block_chain = block
             self.last_created_block_event.handle_event_flag = False
-            block_arrivals = self._send_block_to_neighbors(block)
+            block_arrivals = self._send_block_to_neighbors(block, timestamp)
             new_block_creation_event = \
-                self.generate_block_creation_event(block.timestamp)
+                self.generate_block_creation_event(timestamp)
             # todo: is this the right place?
             self.check_difficulty_update()
             return new_block_creation_event, block_arrivals

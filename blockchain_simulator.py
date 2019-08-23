@@ -34,7 +34,7 @@ class System:
                 assert isinstance(next_event, BlockArrival)
                 receiver_node = self.nodes[next_event.receiver_node_id]
                 new_block_creation_event, block_arrivals = \
-                    receiver_node.handle_block_arrival(next_event.block)
+                    receiver_node.handle_block_arrival(next_event)
                 if new_block_creation_event is not None:
                     for block_arrival in block_arrivals:
                         self.events_queue.put(block_arrival)
