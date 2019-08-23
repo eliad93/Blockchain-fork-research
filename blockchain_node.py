@@ -20,7 +20,10 @@ class Node:
         self.target_block_creation_rate = target_block_creation_rate
 
     def _create_block(self, timestamp):
-        new_block = Block(self.block_chain, timestamp, self.node_id)
+        epoch_first_block = None if self._is_last_epoch_block() \
+            else self.block_chain.epoch_first_block
+        new_block = Block(self.block_chain, timestamp,
+                          self.node_id, epoch_first_block)
         self.block_chain = new_block
         return new_block
 
@@ -72,10 +75,21 @@ class Node:
         current_epoch = self.block_chain.block_index // self.blocks_per_epoch
         if current_epoch > self.current_epoch:
             # todo: consider only last epoch
-            chains_block_creation_rate = \
-                self.block_chain.timestamp / self.block_chain.block_index
+            last_complete_epoch_block = self._last_complete_epoch_block()
+            quanta = last_complete_epoch_block.timestamp - \
+                last_complete_epoch_block.epoch_first_block.timestamp
+            chains_block_creation_rate = quanta / self.blocks_per_epoch
             update_factor = \
                 self.target_block_creation_rate / chains_block_creation_rate
             new_difficulty = self.difficulty * update_factor
             self.difficulty = new_difficulty
             self.current_epoch = current_epoch
+
+    def _last_complete_epoch_block(self):
+        return self.block_chain if self._is_last_epoch_block() \
+            else self.block_chain.epoch_first_block.prev
+
+    def _is_last_epoch_block(self):
+        return ((self.block_chain.block_index + 1) % self.blocks_per_epoch) == \
+               0 and (self.block_chain.block_index // self.blocks_per_epoch) == \
+               self.current_epoch

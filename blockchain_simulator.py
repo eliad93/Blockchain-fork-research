@@ -11,7 +11,7 @@ class System:
         self.static_properties = system_static_properties
         self.global_time = 0.
         self.events_queue = Q.PriorityQueue()
-        self.genesis_block = Block(None, 0., None)
+        self.genesis_block = Block(None, 0., None, None)
         self.nodes = self._create_system_nodes(system_static_properties)
         self._generate_block_creation_events()
 
