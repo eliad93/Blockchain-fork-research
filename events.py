@@ -6,7 +6,7 @@ class SystemEvent(abc.ABC):
     def __init__(self, timestamp, node_id):
         self.timestamp = timestamp
         self.initiator_node_id = node_id
-        self.handle_event_flag = True
+        self.handle_event_flag = True # todo: check it
 
     def __lt__(self, other):
         # todo: make sure it's < and not >

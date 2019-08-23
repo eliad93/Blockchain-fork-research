@@ -22,21 +22,23 @@ class System:
         self.global_time = next_event.timestamp
 
         if next_event.handle_event_flag is True:
+            # todo: insert logic into node
             if isinstance(next_event, BlockCreation):
                 creator_node = self.nodes[next_event.initiator_node_id]
-                new_block = creator_node.create_block(next_event.timestamp)
-                self._send_block_to_neighbors(creator_node, new_block)
-                new_block_creation_event = creator_node.generate_block_creation_event(self.global_time)
+                new_block_creation_event, block_arrivals = \
+                    creator_node.create_block(next_event.timestamp)
+                for block_arrival in block_arrivals:
+                    self.events_queue.put(block_arrival)
                 self.events_queue.put(new_block_creation_event)
-                creator_node.check_difficulty_update()
             else:
                 assert isinstance(next_event, BlockArrival)
                 receiver_node = self.nodes[next_event.receiver_node_id]
-                if receiver_node.handle_block_arrival(next_event.block) is True:
-                    self._send_block_to_neighbors(receiver_node, next_event.block)
-                    new_block_creation_event = receiver_node.generate_block_creation_event(self.global_time)
+                new_block_creation_event, block_arrivals = \
+                    receiver_node.handle_block_arrival(next_event.block)
+                if new_block_creation_event is not None:
+                    for block_arrival in block_arrivals:
+                        self.events_queue.put(block_arrival)
                     self.events_queue.put(new_block_creation_event)
-                    receiver_node.check_difficulty_update()
 
     def _send_block_to_neighbors(self, sender_node, block):
         block_arrivals = sender_node.send_block(self.global_time, block)
