@@ -7,7 +7,7 @@ from events import BlockCreation, BlockArrival
 class Node:
 
     def __init__(self, power, neighbors, difficulty, genesis_block,
-                 node_id, blocks_per_epoch, target_block_creation_rate):
+                 node_id, blocks_per_epoch, target_time_between_blocks):
         self.power = power
         self.neighbors = neighbors
         self.difficulty = difficulty
@@ -17,7 +17,7 @@ class Node:
         self.current_epoch = 0
         self.last_created_block_event = None
         self.blocks_per_epoch = blocks_per_epoch
-        self.target_block_creation_rate = target_block_creation_rate
+        self.target_time_between_blocks = target_time_between_blocks
 
     def _create_block(self, timestamp):
         epoch_first_block = None if self._is_last_epoch_block() \
@@ -58,7 +58,8 @@ class Node:
     def print_ledger(self):
         b = self.block_chain
         while b.block_index != 0:
-            print(b.block_index)
+            print("block_index: {} owner_id: {}".format(b.block_index, b.owner_id))
+            # print(b.__dict__)
             b = b.prev_block
 
     def _time_until_next_block(self):
@@ -78,16 +79,16 @@ class Node:
             last_complete_epoch_block = self._last_complete_epoch_block()
             quanta = last_complete_epoch_block.timestamp - \
                 last_complete_epoch_block.epoch_first_block.timestamp
-            chains_block_creation_rate = quanta / self.blocks_per_epoch
+            epoch_time_between_blocks = quanta / self.blocks_per_epoch
             update_factor = \
-                self.target_block_creation_rate / chains_block_creation_rate
+                epoch_time_between_blocks / self.target_time_between_blocks
             new_difficulty = self.difficulty * update_factor
             self.difficulty = new_difficulty
             self.current_epoch = current_epoch
 
     def _last_complete_epoch_block(self):
         return self.block_chain if self._is_last_epoch_block() \
-            else self.block_chain.epoch_first_block.prev
+            else self.block_chain.epoch_first_block.prev_block
 
     def _is_last_epoch_block(self):
         return ((self.block_chain.block_index + 1) % self.blocks_per_epoch) == \

@@ -13,3 +13,4 @@ class Block:
     def is_epoch_first_block(self):
         return self == self.epoch_first_block
 
+
