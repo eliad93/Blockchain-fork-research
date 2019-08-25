@@ -1,18 +1,26 @@
 from blockchain_simulator import SystemProperties, System
-from events import BlockCreation, BlockArrival
 
-simple_path_with_three_nodes = [[0, 1, -1],
-                                [1, 0, 1],
-                                [-1, 1, 0]]
-power_list = [1, 1, 1]
+graph1 = [[0, 1, -1],
+          [1, 0, 1],
+          [-1, 1, 0]]
+power_list1 = [1, 1, 1]
+
+graph2 = [[0, 6, 17, -1, -1, 100],
+          [6, 0, 13, -1, -1, -1],
+          [17, 13, 0, -1, -1, -1],
+          [-1, -1, -1, 0, 3, 29],
+          [-1, -1, -1, 3, 0, 47],
+          [100, -1, -1, 29, 47, 0]]
+
+power_list2 = [2, 4, 8, 16, 32, 64]
 
 
 def main():
-    prop1 = SystemProperties(simple_path_with_three_nodes, power_list, 2016, 600)
-    system1 = System(prop1)
-    for i in range(300):
-        system1.step()
-    system1.print_nodes_ledgers()
+    prop = SystemProperties(graph2, power_list2, 2016, 600)
+    system = System(prop)
+    for i in range(5000):
+        system.step()
+    system.print_nodes_ledgers()
 
 
 if __name__ == "__main__":
