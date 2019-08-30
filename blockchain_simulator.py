@@ -7,11 +7,16 @@ from events import BlockCreation, BlockArrival
 
 class System:
 
-    def __init__(self, system_static_properties):
+    def __init__(self, graph_number, system_static_properties):
+        self.graph_number = graph_number
         self.static_properties = system_static_properties
         self.global_time = 0.
         self.events_queue = Q.PriorityQueue()
-        self.genesis_block = Block(None, 0., None, None)
+        initial_difficulty = 1. / float(system_static_properties.get_powers_sum() *
+                                        system_static_properties.get_target_block_creation_rate())
+        self.genesis_block = Block(None, self.global_time, None, initial_difficulty,
+                                   system_static_properties.get_blocks_per_epoch(),
+                                   system_static_properties.get_target_block_creation_rate())
         self.nodes = self._create_system_nodes()
         self._generate_block_creation_events()
 
@@ -36,20 +41,21 @@ class System:
                         self.events_queue.put(event)
 
     def print_nodes_ledgers(self):
+        print("graph_number {}:".format(self.graph_number))
         for node in self.nodes:
             node.print_ledger()
+            print("=======================================")
 
     def _create_system_nodes(self):
         p = self.static_properties
-        initial_difficulty = 1. / (p.get_powers_sum() * p.get_target_block_creation_rate())
-        nodes_list = [Node(p.get_power_by_node_id(i), [], initial_difficulty, self.genesis_block, i,
-                           p.get_blocks_per_epoch(), p.get_target_block_creation_rate())
+        nodes_list = [Node(p.get_power_by_node_id(i), [], self.genesis_block, i)
                       for i in range(p.get_number_of_nodes())]
         for node in nodes_list:
             for other_node in nodes_list:
-                propagation_time = p.get_adjacency_matrix_cell(node.get_id(), other_node.get_id())
-                if propagation_time > 0:
-                    node.add_neighbor(other_node, propagation_time)
+                if node.get_id() != other_node.get_id():
+                    propagation_time = p.get_adjacency_matrix_cell(node.get_id(), other_node.get_id())
+                    if propagation_time >= 0:
+                        node.add_neighbor(other_node, propagation_time)
         return nodes_list
 
     def _generate_block_creation_events(self):
