@@ -51,6 +51,21 @@ class Node:
                                                                       b.get_owner_id()))
             b = b.get_prev()
 
+    def print_forks_ledger(self):
+        number_of_forks = 0
+        b = self.block_chain
+        print("Node's id: {}".format(self.node_id))
+        while b.get_index() > 0:
+            if b.get_forks_counter() > 0:
+                number_of_forks += b.get_forks_counter()
+                print("There was fork in block: {}.\nblock creation time {}, block's owner: {}, number of forks: {}"
+                    .format(b.get_index(), b.get_timestamp(), b.get_owner_id(), b.get_forks_counter()))
+            b = b.get_prev()
+        if b.get_forks_counter() > 0:
+            number_of_forks += b.get_forks_counter()
+            print("Number of forks in genesis block: {}\nTotal number of forks in the node's chain is: {}\nForks per blocks: {}".format(
+                b.get_forks_counter(), number_of_forks, self.block_chain.get_index() / number_of_forks))
+
     def _create_block(self, timestamp):
         new_block = Block(self.block_chain, timestamp, self.node_id, None, None, None)
         self.block_chain = new_block

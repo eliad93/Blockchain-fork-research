@@ -16,6 +16,9 @@ class Block:
             index_in_epoch = self.block_index % self.blocks_per_epoch
             self.epoch_first_block = self if index_in_epoch == 1 else prev_block.epoch_first_block
         self._check_difficulty_update()
+        self.forks_counter = -1
+        if prev_block is not None:
+            prev_block.forks_counter += 1
 
     def get_index(self):
         return self.block_index
@@ -31,6 +34,9 @@ class Block:
 
     def get_difficulty(self):
         return self.difficulty
+
+    def get_forks_counter(self):
+        return self.forks_counter
 
     def _check_difficulty_update(self):
         if self == self.epoch_first_block and self.block_index > 1:
