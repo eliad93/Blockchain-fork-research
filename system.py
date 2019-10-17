@@ -52,7 +52,8 @@ class System:
     def print_nodes_ledgers(self):
         print("graph_number {}:".format(self.graph_number))
         for node in self.nodes:
-            node.print_ledger()
+            # node.print_ledger()
+            node.print_forks_ledger()
             print("=======================================")
 
     def _create_system_nodes(self):
