@@ -1,4 +1,5 @@
-import queue as Q
+import queue
+from heapq import heappush, heappop
 
 from blockchain_data_structures import Block
 from blockchain_node import Node
@@ -6,39 +7,47 @@ from events import BlockCreation, BlockArrival
 
 
 class System:
-
-    def __init__(self, graph_number, system_static_properties):
+    
+    def __init__(self, graph_number, static_properties):
         self.graph_number = graph_number
-        self.static_properties = system_static_properties
+        self.static_properties = static_properties
         self.global_time = 0.
-        self.events_queue = Q.PriorityQueue()
-        initial_difficulty = 1. / float(system_static_properties.get_powers_sum() *
-                                        system_static_properties.get_target_block_creation_rate())
-        self.genesis_block = Block(None, self.global_time, None, initial_difficulty,
-                                   system_static_properties.get_blocks_per_epoch(),
-                                   system_static_properties.get_target_block_creation_rate())
+        self.events_queue = []
+        initial_difficulty = 1. / float(
+            static_properties.get_powers_sum() *
+            static_properties.get_target_block_creation_rate())
+        self.genesis_block = Block(None, self.global_time, None,
+                                   initial_difficulty,
+                                   static_properties.get_blocks_per_epoch(),
+                                   static_properties.
+                                   get_target_block_creation_rate())
         self.nodes = self._create_system_nodes()
         self._generate_block_creation_events()
 
     def step(self):
-        assert not self.events_queue.empty()
+        assert not len(self.events_queue) == 0
 
-        next_event = self.events_queue.get()
+        next_event = heappop(self.events_queue)
         self.global_time = next_event.get_timestamp()
 
         if next_event.get_handle_event_flag() is True:
             if isinstance(next_event, BlockCreation):
                 creator_node = self.nodes[next_event.get_initiator_node_id()]
-                new_block_creation_event, block_arrival_events = creator_node.handle_block_creation_event(next_event)
+                new_block_creation_event, block_arrival_events = \
+                    creator_node.handle_block_creation_event(next_event)
                 for event in [new_block_creation_event] + block_arrival_events:
-                    self.events_queue.put(event)
+                    heappush(self.events_queue, event)
+
             else:
                 assert isinstance(next_event, BlockArrival)
                 receiver_node = self.nodes[next_event.get_receiver_node_id()]
-                new_block_creation_event, block_arrival_events = receiver_node.handle_block_arrival(next_event)
+                new_block_creation_event, block_arrival_events = \
+                    receiver_node.handle_block_arrival(next_event)
                 if new_block_creation_event is not None:
-                    for event in [new_block_creation_event] + block_arrival_events:
-                        self.events_queue.put(event)
+                    for event in [new_block_creation_event] + \
+                                 block_arrival_events:
+                        heappush(self.events_queue, event)
+        return next_event
 
     def print_nodes_ledgers(self):
         print("graph_number {}:".format(self.graph_number))
@@ -53,20 +62,36 @@ class System:
         for node in nodes_list:
             for other_node in nodes_list:
                 if node.get_id() != other_node.get_id():
-                    propagation_time = p.get_adjacency_matrix_cell(node.get_id(), other_node.get_id())
+                    propagation_time = p.get_adjacency_matrix_cell(
+                        node.get_id(), other_node.get_id())
                     if propagation_time >= 0:
                         node.add_neighbor(other_node, propagation_time)
         return nodes_list
 
     def _generate_block_creation_events(self):
-        block_creation_events = [node.generate_block_creation_event(self.global_time) for node in self.nodes]
+        block_creation_events = [
+            node.generate_block_creation_event(self.global_time) for node in
+            self.nodes]
         for event in block_creation_events:
-            self.events_queue.put(event)
+            heappush(self.events_queue, event)
+
+    def print_nodes_accepted_blocks(self):
+        print("graph_number {}:".format(self.graph_number))
+        for node in self.nodes:
+            node.print_accepted_blocks()
+            print("=======================================")
+
+    def get_num_nodes(self):
+        return len(self.nodes)
+
+    def get_nodes(self):
+        return self.nodes
 
 
 class SystemProperties:
 
-    def __init__(self, adjacency_matrix, power_list, blocks_per_epoch, target_block_creation_rate):
+    def __init__(self, adjacency_matrix, power_list, blocks_per_epoch,
+                 target_block_creation_rate):
         self.adjacency_matrix = adjacency_matrix
         self.number_of_nodes = len(adjacency_matrix)
         self.power_list = power_list

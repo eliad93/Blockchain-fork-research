@@ -1,4 +1,6 @@
-from blockchain_simulator import SystemProperties, System
+from simulator import Simulator
+from system import System, SystemProperties
+from simulator_log import SimulatorLog
 
 graph1 = [[0., 1., -1.],
           [1., 0., 1.],
@@ -15,8 +17,8 @@ graph2 = [[0., 6., 17., -1., -1., 100.],
 
 power_list2 = [2., 4., 8., 16., 32., 64.]
 
-graph3 = [[0., 9999999.],
-          [9999999., 0.]]
+graph3 = [[0., 999999.],
+          [999999., 0.]]
 
 power_list3 = [1., 1.]
 
@@ -72,25 +74,32 @@ def main():
     # system2 = System(2, props2)
     # props3 = SystemProperties(graph3, power_list3, 100, 600.)
     # system3 = System(3, props3)
-    # props4 = SystemProperties(graph3, power_list3, 99999999999999999, 600.)
-    # system4 = System(4, props4)
+    props4 = SystemProperties(graph3, power_list3, 99999999999999999, 600.)
+    system4 = System(4, props4)
     # props5 = SystemProperties(graph4, power_list4, 100, 600.)
     # system5 = System(5, props5)
-    props6 = SystemProperties(graph5, power_list4, 100, 600.)
-    system6 = System(6, props6)
-    for i in range(50000):
+    # props6 = SystemProperties(graph5, power_list4, 100, 600.)
+    # system6 = System(6, props6)
+    # for i in range(3000):
         # system1.step()
         # system2.step()
         # system3.step()
         # system4.step()
         # system5.step()
-        system6.step()
+        # system6.step()
     # system1.print_nodes_ledgers()
     # system2.print_nodes_ledgers()
     # system3.print_nodes_ledgers()
     # system4.print_nodes_ledgers()
+    # system4.print_nodes_accepted_blocks()
     # system5.print_nodes_ledgers()
-    system6.print_nodes_ledgers()
+    # system6.print_nodes_ledgers()
+    # log = SimulatorLog(props4.get_number_of_nodes(), "try")
+    # log.snapshot_blockchains(system4.nodes)
+    simulator = Simulator(system4)
+    simulator.run(experiment_name="try2", iterations=30000,
+                  block_arrivals_per_snapshot=100)
+
 
 if __name__ == "__main__":
     main()
