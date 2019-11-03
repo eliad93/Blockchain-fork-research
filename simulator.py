@@ -7,7 +7,7 @@ from system import System
 
 class Simulator:
     """
-    This is a helper class, used to run simulations.
+    Helper class for running simulations.
     """
     def __init__(self, system: System):
         self.initial_system = copy.deepcopy(system)  # enables multiple runs
@@ -19,10 +19,11 @@ class Simulator:
         self.log = SimulatorLog(self.system.get_num_nodes(), experiment_name)
         num_block_arrivals = 0
         for i in range(iterations):
-            event_class = self.system.step()
-            if isinstance(event_class, BlockArrival):
+            current_event = self.system.step()
+            if isinstance(current_event, BlockArrival):
                 num_block_arrivals += 1
                 if num_block_arrivals % block_arrivals_per_snapshot == 0:
                     self.log.snapshot_blockchains(self.system.get_nodes())
-        self.log.save_data(verbose=True)
+        self.log.save_data(verbose=False)
+        self.log.load_data(verbose=True)
 

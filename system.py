@@ -19,8 +19,7 @@ class System:
         self.genesis_block = Block(None, self.global_time, None,
                                    initial_difficulty,
                                    static_properties.get_blocks_per_epoch(),
-                                   static_properties.
-                                   get_target_block_creation_rate())
+                                   static_properties.get_target_block_creation_rate())
         self.nodes = self._create_system_nodes()
         self._generate_block_creation_events()
 
@@ -43,6 +42,7 @@ class System:
                 receiver_node = self.nodes[next_event.get_receiver_node_id()]
                 new_block_creation_event, block_arrival_events = \
                     receiver_node.handle_block_arrival(next_event)
+                # new_block_creation_event is None if the arrived block was not accepted
                 if new_block_creation_event is not None:
                     for event in [new_block_creation_event] + \
                                  block_arrival_events:

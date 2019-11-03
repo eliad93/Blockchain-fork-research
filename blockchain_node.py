@@ -92,9 +92,12 @@ class Node:
     def print_accepted_blocks(self):
         b = self.block_chain
         print("node_id: {}".format(self.node_id))
+        total_accepted = 0
         while b.get_index() != 0:
             if b.get_index() != self.node_id:
+                total_accepted += 1
                 print("block_index: {} block_time {} owner_id: {}".format(
                     b.get_index(), b.get_timestamp(),
                     b.get_owner_id()))
             b = b.get_prev()
+        print("\n\n\nTotal number of accepted blocks is {}".format(total_accepted))
