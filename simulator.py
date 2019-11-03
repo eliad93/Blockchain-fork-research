@@ -4,11 +4,12 @@ from events import BlockArrival
 from simulator_log import SimulatorLog
 from system import System
 
-
+#TODO: Add multiple runs and averages to all necessary output
 class Simulator:
     """
     Helper class for running simulations.
     """
+
     def __init__(self, system: System):
         self.initial_system = copy.deepcopy(system)  # enables multiple runs
         self.system = copy.deepcopy(system)  # current active system
@@ -26,4 +27,3 @@ class Simulator:
                     self.log.snapshot_blockchains(self.system.get_nodes())
         self.log.save_data(verbose=False)
         self.log.load_data(verbose=True)
-

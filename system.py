@@ -8,8 +8,8 @@ from events import BlockCreation, BlockArrival
 
 class System:
     
-    def __init__(self, graph_number, static_properties):
-        self.graph_number = graph_number
+    def __init__(self, graph_name, static_properties):
+        self.graph_number = graph_name
         self.static_properties = static_properties
         self.global_time = 0.
         self.events_queue = []

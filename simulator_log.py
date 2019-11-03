@@ -26,10 +26,11 @@ class NodeData:
         self.log = []
         self.first_block_timestamp = None
         self.first_foreign_block_timestamp = None
+        self.first_foreign_block_index = None
 
     @staticmethod
     def singletons_names():
-        return ["First Block Timestamp", "First Foreign Block Timestamp"]
+        return ["First Block Timestamp", "First Foreign Block Timestamp", "First Foreign Block Index"]
 
     def add_record(self, log_record: LogRecord):
         self.log.append(log_record)
@@ -40,8 +41,9 @@ class NodeData:
     def set_first_block_timestamp(self, b):
         self.first_block_timestamp = b.get_timestamp()
 
-    def set_first_foreign_block_timestamp(self, b):
+    def set_first_foreign_block_data(self, b):
         self.first_foreign_block_timestamp = b.get_timestamp()
+        self.first_foreign_block_index = b.get_index()
 
     def get_singletons(self):
         return self.first_block_timestamp, self.first_foreign_block_timestamp
@@ -62,14 +64,14 @@ class SimulatorLog:
             node_log = self.nodes_log_dict[node.get_id()]  # type: NodeData
             b = node.get_block_chain()  # type: Block
             self_blocks_count = 0
-            forks_count = 0
+            forks_count = -1  # To eliminate genesis block's fork
             while b.get_index() != 0:
                 if b.get_forks_counter() > 0:
                     forks_count += b.get_forks_counter()
                 if b.get_owner_id() == node.get_id():
                     self_blocks_count += 1
                 else:
-                    node_log.set_first_foreign_block_timestamp(b)
+                    node_log.set_first_foreign_block_data(b)
                 node_log.set_first_block_timestamp(b)
                 b = b.get_prev()
             assert (b.get_index() == 0 and b.get_forks_counter() >= 0)
@@ -78,6 +80,7 @@ class SimulatorLog:
             node_log.add_record(LogRecord(b.get_timestamp(), b.get_index(),
                                           self_blocks_count, forks_count))
 
+    # TODO: Add header of system's setup
     def save_data(self, verbose=False):
         root_dir_name = self.root_dir_name
         if not os.path.exists(root_dir_name):
@@ -105,7 +108,6 @@ class SimulatorLog:
             df_singletons.to_pickle(path=singletons_file_path)
 
     def load_data(self, verbose=False):
-        # todo: fix load data
         root_dir_name = self.root_dir_name
         experiment_dir_path = os.path.join(root_dir_name, self.experiment_name)
         assert os.path.exists(experiment_dir_path)
