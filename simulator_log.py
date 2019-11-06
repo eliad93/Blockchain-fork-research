@@ -7,7 +7,8 @@ from blockchain_node import Node
 
 
 class LogRecord:
-    def __init__(self, timestamp, blocks_counter, self_blocks_counter, forks_counter):
+    def __init__(self, timestamp, blocks_counter, self_blocks_counter,
+                 forks_counter):
         self.timestamp = timestamp
         self.blocks_counter = blocks_counter
         self.self_blocks_counter = self_blocks_counter
@@ -30,7 +31,8 @@ class NodeData:
 
     @staticmethod
     def singletons_names():
-        return ["First Block Timestamp", "First Foreign Block Timestamp", "First Foreign Block Index"]
+        return ["First Block Timestamp", "First Foreign Block Timestamp",
+                "First Foreign Block Index"]
 
     def add_record(self, log_record: LogRecord):
         self.log.append(log_record)
@@ -46,11 +48,12 @@ class NodeData:
         self.first_foreign_block_index = b.get_index()
 
     def get_singletons(self):
-        return self.first_block_timestamp, self.first_foreign_block_timestamp
+        return self.first_block_timestamp, self.first_foreign_block_timestamp, \
+               self.first_foreign_block_index
 
 
 class SimulatorLog:
-    def __init__(self, num_nodes, experiment_name):
+    def __init__(self, num_nodes, experiment_name, setup_description):
         self.num_nodes = num_nodes
         self.experiment_name = experiment_name
         # list of rows for each node
@@ -58,6 +61,7 @@ class SimulatorLog:
         self.data_frames_dict = {i: None for i in range(num_nodes)}
         self.singletons_data_frames_dict = {i: None for i in range(num_nodes)}
         self.root_dir_name = "results"
+        self.setup_description = setup_description
 
     def snapshot_blockchains(self, nodes):
         for node in nodes:
@@ -80,7 +84,7 @@ class SimulatorLog:
             node_log.add_record(LogRecord(b.get_timestamp(), b.get_index(),
                                           self_blocks_count, forks_count))
 
-    # TODO: Add header of system's setup
+    # TODO: split save data to several methods
     def save_data(self, verbose=False):
         root_dir_name = self.root_dir_name
         if not os.path.exists(root_dir_name):
@@ -88,9 +92,17 @@ class SimulatorLog:
         experiment_dir_path = os.path.join(root_dir_name, self.experiment_name)
         assert not os.path.exists(experiment_dir_path)
         os.makedirs(experiment_dir_path)
+        setup_description_file_path = os.path.join(experiment_dir_path,
+                                                   "setup_description")
+        if not os.path.exists(setup_description_file_path):
+            with open(setup_description_file_path, 'w') as setup_description:
+                setup_description.write(self.setup_description)
+        if verbose:
+            print(self.setup_description)
+
         for i in range(self.num_nodes):
             node_log_file_path = os.path.join(experiment_dir_path, "node"
-                                               + str(i) + "_log")
+                                              + str(i) + "_log")
             singletons_file_path = os.path.join(experiment_dir_path, "node"
                                                 + str(i) + "_singletons")
             node_data = self.nodes_log_dict[i]  # type: NodeData
@@ -125,5 +137,3 @@ class SimulatorLog:
                 print(df)
                 print(singletons_file_path)
                 print(df_singletons)
-
-

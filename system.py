@@ -9,7 +9,7 @@ from events import BlockCreation, BlockArrival
 class System:
     
     def __init__(self, graph_name, static_properties):
-        self.graph_number = graph_name
+        self.graph_name = graph_name
         self.static_properties = static_properties
         self.global_time = 0.
         self.events_queue = []
@@ -50,7 +50,7 @@ class System:
         return next_event
 
     def print_nodes_ledgers(self):
-        print("graph_number {}:".format(self.graph_number))
+        print("graph_name {}:".format(self.graph_name))
         for node in self.nodes:
             # node.print_ledger()
             node.print_forks_ledger()
@@ -77,7 +77,7 @@ class System:
             heappush(self.events_queue, event)
 
     def print_nodes_accepted_blocks(self):
-        print("graph_number {}:".format(self.graph_number))
+        print("graph_name {}:".format(self.graph_name))
         for node in self.nodes:
             node.print_accepted_blocks()
             print("=======================================")
@@ -87,6 +87,19 @@ class System:
 
     def get_nodes(self):
         return self.nodes
+
+    def get_static_properties(self):
+        return self.static_properties
+
+    def setup_description(self):
+        sp = self.get_static_properties()
+        setup_description = "# graph name: {}\n# number of nodes: {}\n" \
+                            "# power list\n{}\n# blocks per epoch: {}\n" \
+                            "# target block creation rate: {}"\
+            .format(self.graph_name, self.get_num_nodes(),
+                    sp.get_power_list(), sp.get_blocks_per_epoch(),
+                    sp.get_target_block_creation_rate())
+        return setup_description
 
 
 class SystemProperties:
@@ -116,3 +129,6 @@ class SystemProperties:
 
     def get_target_block_creation_rate(self):
         return self.target_block_creation_rate
+
+    def get_power_list(self):
+        return self.power_list

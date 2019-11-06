@@ -34,8 +34,8 @@ def main():
     # log = SimulatorLog(props4.get_number_of_nodes(), "try")
     # log.snapshot_blockchains(system4.nodes)
     simulator = Simulator(system4)
-    simulator.run(experiment_name="try2", iterations=3000000,
-                  block_arrivals_per_snapshot=5000)
+    simulator.run(experiment_name="try3", iterations=3000,
+                  block_arrivals_per_snapshot=50)
 
 
 if __name__ == "__main__":
