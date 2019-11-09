@@ -18,12 +18,12 @@ def main():
     # props6 = SystemProperties(graph5, power_list4, 100, 600.)
     # system6 = System(6, props6)
     # for i in range(3000):
-        # system1.step()
-        # system2.step()
-        # system3.step()
-        # system4.step()
-        # system5.step()
-        # system6.step()
+    # system1.step()
+    # system2.step()
+    # system3.step()
+    # system4.step()
+    # system5.step()
+    # system6.step()
     # system1.print_nodes_ledgers()
     # system2.print_nodes_ledgers()
     # system3.print_nodes_ledgers()
@@ -34,8 +34,9 @@ def main():
     # log = SimulatorLog(props4.get_number_of_nodes(), "try")
     # log.snapshot_blockchains(system4.nodes)
     simulator = Simulator(system4)
-    simulator.run(experiment_name="try3", iterations=3000,
-                  block_arrivals_per_snapshot=50)
+    simulator.run_simulation(experiment_name="try3", iterations=3000,
+                             block_arrivals_per_snapshot=50, reps=10,
+                             verbose=True)
 
 
 if __name__ == "__main__":
