@@ -11,7 +11,10 @@ def main():
     systems = SystemGenerator(graph3, [power_list3], [99999999999999999],
                               [600.], 4)
     simulator = Simulator(systems)
-    simulator.hyper_run(experiment_name="try3", iterations=30000,
+    simulator.run_simulation(experiment_name="try3", iterations=30000,
+                        block_arrivals_per_snapshot=500, reps=10,
+                        verbose=True, system=system4)
+    simulator.hyper_run(experiment_name="try3_system_generator", iterations=30000,
                         block_arrivals_per_snapshot=500, reps=10,
                         verbose=True)
 
