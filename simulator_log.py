@@ -12,8 +12,9 @@ string CONSTANTS
 ROOT_DIR = "results"
 SETUP_FILE = "setup_description"
 SYSTEM_PICKLE = "system_pickle"
-NODE_LOG_FILE = "node{}_log{}"
-NODE_SINGLETONS_FILE = "node{}_singletons"
+LOG_FILE = "log_{}"
+SINGLETONS_FILE = "singletons_{}"
+NODE_DIR = "node_{}"
 
 
 class LogRecord:
@@ -96,6 +97,7 @@ class SimulatorLog:
     def save_data(self, system, log_idx, verbose=False):
         self._create_root_dir()
         experiment_dir = self._create_experiment_dirs_files(system, verbose)
+        self._create_nodes_dirs(experiment_dir, self.num_nodes)
         for i in range(self.num_nodes):
             self._create_node_files(experiment_dir, i, log_idx, verbose)
 
@@ -105,9 +107,9 @@ class SimulatorLog:
         assert os.path.exists(experiment_dir_path)
         for i in range(self.num_nodes):
             node_data_file_path = os.path.join(experiment_dir_path,
-                                              NODE_LOG_FILE.format(i, 0))
+                                              LOG_FILE.format(i, 0))
             singletons_file_path = os.path.join(experiment_dir_path,
-                                                NODE_SINGLETONS_FILE.format(i))
+                                                SINGLETONS_FILE.format(i))
             df = pd.read_pickle(node_data_file_path)
             df_singletons = pd.read_pickle(singletons_file_path)
             self.data_frames_dict[i] = df
@@ -158,10 +160,11 @@ class SimulatorLog:
         return experiment_dir_path
 
     def _create_node_files(self, dir_path, node_idx, log_idx, verbose=False):
-        node_log_file_path = os.path.join(dir_path,
-                                          NODE_LOG_FILE.format(node_idx, log_idx))
-        singletons_file_path = os.path.join(dir_path,
-                                            NODE_SINGLETONS_FILE.format(node_idx))
+        node_dir_path = os.path.join(dir_path, NODE_DIR.format(node_idx))
+        node_log_file_path = os.path.join(node_dir_path,
+                                          LOG_FILE.format(log_idx))
+        singletons_file_path = os.path.join(node_dir_path,
+                                            SINGLETONS_FILE.format(log_idx))
         node_data = self.nodes_data_dict[node_idx]  # type: NodeData
         df = pd.DataFrame(data=map(LogRecord.get_data_as_tuple,
                                    node_data.get_log()),
@@ -171,5 +174,11 @@ class SimulatorLog:
         if verbose:
             print(df)
             print(df_singletons)
-        df.to_pickle(path=node_log_file_path)
-        df_singletons.to_pickle(path=singletons_file_path)
+        df.to_csv(path_or_buf=node_log_file_path)
+        df_singletons.to_csv(path_or_buf=singletons_file_path)
+
+    def _create_nodes_dirs(self, experiment_dir_path, num_nodes):
+        for i in range(num_nodes):
+            node_dir_path = os.path.join(experiment_dir_path, NODE_DIR.format(i))
+            if not os.path.exists(node_dir_path):
+                os.makedirs(node_dir_path)

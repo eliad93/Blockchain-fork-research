@@ -1,4 +1,5 @@
 import copy
+from typing import Iterable
 
 import numpy as np
 
@@ -13,7 +14,7 @@ class Simulator:
     Helper class for running simulations.
     """
 
-    def __init__(self, system: System):
+    def __init__(self, systems: Iterable[System]):
         self.initial_system = copy.deepcopy(system)  # enables multiple runs
         self.system = None  # current active system
         self.log = None
@@ -23,16 +24,15 @@ class Simulator:
         logs = []
         for rep in range(reps):
             self._reset_system()
-            logs.append(self.run(experiment_name, iterations,
+            logs.append(self._run(experiment_name, iterations,
                                  block_arrivals_per_snapshot))
-
         ffbi_list = self._extract_ffbi_from_logs(logs)
         ffbi_avg = np.mean(ffbi_list)
         if verbose:
             print(ffbi_avg)
         self._save_data(logs, verbose=verbose)
 
-    def run(self, experiment_name=None, iterations=100,
+    def _run(self, experiment_name=None, iterations=100,
             block_arrivals_per_snapshot=1):
         log = SimulatorLog(self.system.get_num_nodes(), experiment_name,
                            self.system.setup_description())
