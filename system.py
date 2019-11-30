@@ -5,7 +5,15 @@ from blockchain_data_structures import Block
 from blockchain_node import Node
 from events import BlockCreation, BlockArrival
 
-
+# Main class that contains all system's data
+# Params:
+#               graph_name: The name of the graph.
+#               static_properties: Contain all initial static properties of the system (SystemProperties class).
+#               global_time: The system's current time.
+# Other fields:
+#               events_queue: Queue with all upcoming events in the system (BlockCreation, BlockArrival).
+#               genesis_block: First block in the system.
+#               nodes: All system's nodes/users.
 class System:
     
     def __init__(self, graph_name, static_properties):
@@ -101,7 +109,13 @@ class System:
                     sp.get_target_block_creation_rate())
         return setup_description
 
-
+# Class for system's static properties
+# Params:
+#           adjacency_matrix: The topology of the graph. adjacency_matrix[i][j] == "distance" (actually latency)
+#           from node i to j.
+#           power_list: List with the system's nodes powers. power_list[i] == power of node i.
+#           blocks_per_epoch: Number of blocks per epoch.
+#           target_block_creation_rate: Wanted blocks creation rate.
 class SystemProperties:
 
     def __init__(self, adjacency_matrix, power_list, blocks_per_epoch,

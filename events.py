@@ -1,6 +1,10 @@
 import abc
 
-
+# Abstract class for block events
+# Params:
+#           timestamp: Creation time.
+#           initiator_node_id: ID of event's creator node.
+#           handle_event_flag: If flag is False, the event will be ignored.
 class SystemEvent(abc.ABC):
 
     def __init__(self, timestamp, node_id):
@@ -23,13 +27,16 @@ class SystemEvent(abc.ABC):
     def set_handle_event_flag(self, value):
         self.handle_event_flag = value
 
-
+# Class of block creation event
 class BlockCreation(SystemEvent):
 
     def __init__(self, timestamp, node_id):
         super().__init__(timestamp, node_id)
 
-
+# Class of block arrival event
+# Params:
+#           receiver_node_id: ID of the receiver node.
+#           block: The arrived block.
 class BlockArrival(SystemEvent):
 
     def __init__(self, timestamp, node_id, receiver_node_id, block):

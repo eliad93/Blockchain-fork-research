@@ -4,6 +4,16 @@ from blockchain_data_structures import Block
 from events import BlockCreation, BlockArrival
 
 
+# Class for a user in the system.
+# Params:
+#               power: Node's mining power.
+#               neighbors: Node's neighbors according to system's topology.
+#               genesis_block: First created block in the system.
+#               node_id: Each node has unique id.
+# Other fields:
+#               block_chain: The node's last block in the blockchain it holds (giving access to all the blocks in
+#               the chain)
+#               last_created_block_event: Pointer to next CreationBlock event.
 class Node:
 
     def __init__(self, power, neighbors, genesis_block, node_id):
@@ -49,14 +59,16 @@ class Node:
         self.last_created_block_event = block_creation_event
         return block_creation_event
 
+    # Helping function for printing data related to the node's blockchain
     def print_ledger(self):
         b = self.block_chain
-        print("node_id: {}". format(self.node_id))
+        print("node_id: {}".format(self.node_id))
         while b.get_index() != 0:
             print("block_index: {} block_time {} owner_id: {}"
                   .format(b.get_index(), b.get_timestamp(), b.get_owner_id()))
             b = b.get_prev()
 
+    # Helping function for printing data related to forks in the node's blockchain
     def print_forks_ledger(self):
         number_of_forks = 0
         b = self.block_chain
@@ -65,12 +77,13 @@ class Node:
             if b.get_forks_counter() > 0:
                 number_of_forks += b.get_forks_counter()
                 print("There was fork in block: {}.\nblock creation time {}, block's owner: {}, number of forks: {}"
-                    .format(b.get_index(), b.get_timestamp(), b.get_owner_id(), b.get_forks_counter()))
+                      .format(b.get_index(), b.get_timestamp(), b.get_owner_id(), b.get_forks_counter()))
             b = b.get_prev()
         if b.get_forks_counter() > 0:
             number_of_forks += b.get_forks_counter()
-            print("Number of forks in genesis block: {}\nTotal number of forks in the node's chain is: {}\nForks per blocks: {}".format(
-                b.get_forks_counter(), number_of_forks, self.block_chain.get_index() / number_of_forks))
+            print(
+                "Number of forks in genesis block: {}\nTotal number of forks in the node's chain is: {}\nForks per blocks: {}".format(
+                    b.get_forks_counter(), number_of_forks, self.block_chain.get_index() / number_of_forks))
 
     def _create_block(self, timestamp):
         new_block = Block(self.block_chain, timestamp, self.node_id, None,
@@ -78,6 +91,8 @@ class Node:
         self.block_chain = new_block
         return new_block
 
+    # Time until creation of next block. Randomly chosen from exponential distribution according to node's power
+    # and blockchain's difficulty (similar to bitcoin).
     def _time_until_next_block(self):
         beta = 1. / (self.power * self.block_chain.get_difficulty())
         return np.random.exponential(scale=beta)
@@ -89,6 +104,7 @@ class Node:
              for neighbor, propagation_time in self.neighbors]
         return block_arrival_events
 
+    # Counts and prints the number of blocks created by other nodes
     def print_accepted_blocks(self):
         b = self.block_chain
         print("node_id: {}".format(self.node_id))

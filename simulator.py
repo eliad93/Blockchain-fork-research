@@ -11,11 +11,8 @@ from system import System
 from system_generator import SystemGenerator
 
 
+# Helper class for running simulations.
 class Simulator:
-    """
-    Helper class for running simulations.
-    """
-
     def __init__(self, systems: SystemGenerator):
         self.systems = systems
         self.initial_system = None  # enables multiple runs

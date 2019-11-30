@@ -6,9 +6,7 @@ import pandas as pd
 from blockchain_data_structures import Block
 from blockchain_node import Node
 
-"""
-string CONSTANTS
-"""
+# Constant strings
 ROOT_DIR = "results"
 SETUP_FILE = "setup_description"
 SYSTEM_PICKLE = "system_pickle"
@@ -16,7 +14,7 @@ LOG_FILE = "log_{}"
 SINGLETONS_FILE = "singletons_{}"
 NODE_DIR = "node_{}"
 
-
+# Class for recording blockchain's data
 class LogRecord:
     def __init__(self, timestamp, blocks_counter, self_blocks_counter,
                  forks_counter):
@@ -35,7 +33,7 @@ class LogRecord:
 
 class NodeData:
     def __init__(self):
-        self.log = []
+        self.log = [] # list of LogRecords
         self.first_block_timestamp = -1  # convenient for aggregations
         self.first_foreign_block_timestamp = -1  # convenient for aggregations
         self.first_foreign_block_index = -1  # convenient for aggregations

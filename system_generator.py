@@ -1,4 +1,4 @@
-# TODO:(Yoni) number of steps, size of step, which parametr to change
+# TODO: number of steps, size of step, which parametr to change
 from collections import Iterable
 
 from system import SystemProperties, System
