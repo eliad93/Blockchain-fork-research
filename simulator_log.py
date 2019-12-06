@@ -14,6 +14,7 @@ LOG_FILE = "log_{}"
 SINGLETONS_FILE = "singletons_{}"
 NODE_DIR = "node_{}"
 
+
 # Class for recording blockchain's data
 class LogRecord:
     def __init__(self, timestamp, blocks_counter, self_blocks_counter,
@@ -33,7 +34,7 @@ class LogRecord:
 
 class NodeData:
     def __init__(self):
-        self.log = [] # list of LogRecords
+        self.log = []  # list of LogRecords
         self.first_block_timestamp = -1  # convenient for aggregations
         self.first_foreign_block_timestamp = -1  # convenient for aggregations
         self.first_foreign_block_index = -1  # convenient for aggregations
@@ -79,14 +80,14 @@ class SimulatorLog:
             node_log = self.nodes_data_dict[node.get_id()]  # type: NodeData
             b = node.get_block_chain()  # type: Block
             self_blocks_count = 0
-            forks_count = -1  # To eliminate genesis block's fork
+            forks_count = 0
             while b.get_index() != 0:
                 forks_count, self_blocks_count = \
                     self._snapshot_block_aux(b, node, forks_count,
                                              self_blocks_count, node_log)
                 b = b.get_prev()
             assert (b.get_index() == 0 and b.get_forks_counter() >= 0)
-            forks_count += b.get_forks_counter()  # todo: is this correct?
+            forks_count += b.get_forks_counter()
             b = node.get_block_chain()
             node_log.add_record(LogRecord(b.get_timestamp(), b.get_index(),
                                           self_blocks_count, forks_count))
@@ -105,7 +106,7 @@ class SimulatorLog:
         assert os.path.exists(experiment_dir_path)
         for i in range(self.num_nodes):
             node_data_file_path = os.path.join(experiment_dir_path,
-                                              LOG_FILE.format(i, 0))
+                                               LOG_FILE.format(i, 0))
             singletons_file_path = os.path.join(experiment_dir_path,
                                                 SINGLETONS_FILE.format(i))
             df = pd.read_pickle(node_data_file_path)
@@ -119,7 +120,7 @@ class SimulatorLog:
     def get_nodes_data(self):
         return self.nodes_data_dict
 
-    def get_ffbi_list(self):
+    def get_ffbi_list(self):  # ffbi = first foreign block index
         return [node_data.get_first_foreign_block_index()
                 for node_data in self.nodes_data_dict.values()]
 
