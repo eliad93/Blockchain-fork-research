@@ -1,19 +1,23 @@
-# Class for a block in a blockchain.
-# Params:
-#               prev_block: Previous block in the chain. If the block is the first one in the chain then None.
-#               timestamp: Creation time.
-#               owner_id: ID of creator/miner.
-#               difficulty: The current difficulty of the chain. Difficulty to mine/create new block.
-#               blocks_per_epoch: The number of blocks in an epoch. Every time a new epoch starts the difficulty is
-#               updated.
-#               target_time_between_blocks: A parameter needed for difficulty update.
-# Other fields:
-#               block_index: The index of the block in the blockchain. The genesis block's index is 0.
-#               epoch_first_block: The first block in the block's epoch in the chain.
-#               forks_counter: The number of forks from the block. If the block is the previous block of more than
-#                              1 block than the counter increases.
-class Block:
+import my_globals
 
+
+class Block:
+    """
+    Class for a block in a blockchain.
+    Params:
+              prev_block: Previous block in the chain. If the block is the first one in the chain then None.
+              timestamp: Creation time.
+              owner_id: ID of creator/miner.
+              difficulty: The current difficulty of the chain. Difficulty to mine/create new block.
+              blocks_per_epoch: The number of blocks in an epoch. Every time a new epoch starts the difficulty is
+              updated.
+              target_time_between_blocks: A parameter needed for difficulty update.
+    Other fields:
+              block_index: The index of the block in the blockchain. The genesis block's index is 0.
+              epoch_first_block: The first block in the block's epoch in the chain.
+              forks_counter: The number of forks from the block. If the block is the previous block of more than
+                             1 block than the counter increases.
+    """
     def __init__(self, prev_block, timestamp, owner_id, difficulty,
                  blocks_per_epoch, target_time_between_blocks):
         self.prev_block = prev_block
@@ -37,6 +41,8 @@ class Block:
         self.forks_counter = -1
         if prev_block is not None:
             prev_block.forks_counter += 1
+            if prev_block.forks_counter > 0:
+                my_globals.inc_forks_count()
 
     def get_index(self):
         return self.block_index

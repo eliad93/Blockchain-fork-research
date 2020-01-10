@@ -1,5 +1,6 @@
 import abc
 
+
 # Abstract class for block events
 # Params:
 #           timestamp: Creation time.
@@ -27,11 +28,13 @@ class SystemEvent(abc.ABC):
     def set_handle_event_flag(self, value):
         self.handle_event_flag = value
 
+
 # Class of block creation event
 class BlockCreation(SystemEvent):
 
     def __init__(self, timestamp, node_id):
         super().__init__(timestamp, node_id)
+
 
 # Class of block arrival event
 # Params:

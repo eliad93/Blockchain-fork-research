@@ -22,6 +22,8 @@ class Node:
         self.block_chain = genesis_block
         self.node_id = node_id  # unique in the system
         self.last_created_block_event = None
+        self.ffbi = -1
+        self.ffbi_timestamp = -1
 
     def get_id(self):
         return self.node_id
@@ -41,10 +43,13 @@ class Node:
         return new_block_creation_event, block_arrival_events
 
     def handle_block_arrival(self, block_arrival_event):
-        block = block_arrival_event.get_block()
+        block = block_arrival_event.get_block()  # type: Block
         timestamp = block_arrival_event.get_timestamp()
         if block.get_index() > self.block_chain.get_index():
             self.block_chain = block
+            if self.ffbi == -1 and block.get_owner_id() != self.node_id:
+                self.ffbi = block.get_index()
+                self.ffbi_timestamp = block.get_timestamp()
             self.last_created_block_event.set_handle_event_flag(False)
             block_arrival_events = \
                 self._send_block_to_neighbors(block, timestamp)
@@ -117,3 +122,12 @@ class Node:
                     b.get_owner_id()))
             b = b.get_prev()
         print("\n\n\nTotal number of accepted blocks is {}".format(total_accepted))
+
+    def get_power(self):
+        return self.power
+
+    def get_ffbi_timestamp(self):
+        return self.ffbi_timestamp
+
+    def get_ffbi(self):
+        return self.ffbi
