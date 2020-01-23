@@ -2,6 +2,7 @@ import os
 import pickle
 
 import pandas as pd
+import numpy as np
 
 import my_globals
 
@@ -143,7 +144,10 @@ class SimulatorLog:
 
     def get_ffbi_list(self):  # ffbi = first foreign block index
         return [node_data.get_first_foreign_block_index() for node_data in self.nodes_data_dict.values()
-                if node_data != -1]
+                if node_data.get_first_foreign_block_index() != -1]
+
+    def get_ffbi_node_idx_tuple_list(self):  # ffbi = first foreign block index
+        return [(i,  self.nodes_data_dict[i].get_first_foreign_block_index()) for i in range(self.num_nodes)]
 
     def get_sbp_lists_list(self):  # spb = self blocks percentage
         return [(i, 100 * self.nodes_data_dict[i].get_self_blocks()/self.nodes_data_dict[i].get_blocks_count())
@@ -216,3 +220,31 @@ class SimulatorLog:
             node_dir_path = os.path.join(experiment_dir_path, NODE_DIR.format(i))
             if not os.path.exists(node_dir_path):
                 os.makedirs(node_dir_path)
+
+
+def logs_to_ffbi_avg(logs):
+    return np.mean([m for m in [min(log.get_ffbi_list(), default=-1) for log in logs] if m > -1])
+
+
+def logs_to_sbp_by_node(logs):
+    sbp_lists_list = [log.get_sbp_lists_list() for log in logs]
+    sbp_by_node = [[] for i in range(len(sbp_lists_list[0]))]
+    for sbp_list in sbp_lists_list:
+        for i in range(len(sbp_list)):
+            sbp_by_node[i].append(sbp_list[i][1])
+    sbp_avg_by_node_list = [np.mean(sbp) for sbp in sbp_by_node]
+    return sbp_avg_by_node_list
+
+
+def logs_to_global_forks_avg(logs):
+    return np.mean([log.get_global_forks_count() for log in logs])
+
+
+def logs_to_meeting_percentage(logs):
+    meeting_percentage = 100 * float(len(
+        [m for m in [min(log.get_ffbi_list(), default=-1) for log in logs] if m > -1])) / float(len(logs))
+    return meeting_percentage
+
+
+def logs_to_node_ffbi_lists_list(logs):
+    return [log.get_ffbi_node_idx_tuple_list() for log in logs]

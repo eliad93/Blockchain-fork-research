@@ -38,15 +38,12 @@ class Simulator:
             self._reset_system()
             logs.append(self._run(experiment_name, iterations,
                                   block_arrivals_per_snapshot))
-
-        ffbi_list, sbp_list, global_forks_count_list, meeting_percentage = self._extract_data_from_logs(logs)
-        ffbi_avg = np.mean(ffbi_list)
-        sbp_avg_by_node_list = [np.mean(sbp) for sbp in sbp_list]
-        global_forks_avg = np.mean(global_forks_count_list)
-        # if verbose:
-        #     print(ffbi_avg)
-        return ffbi_avg, sbp_avg_by_node_list, global_forks_avg, meeting_percentage
-        # self._save_data(logs, verbose=verbose)
+        return logs
+        # ffbi_list, sbp_list, global_forks_count_list, meeting_percentage, node_ffbi_lists_list = self._extract_data_from_logs(logs)
+        # ffbi_avg = np.mean(ffbi_list)
+        # sbp_avg_by_node_list = [np.mean(sbp) for sbp in sbp_list]
+        # global_forks_avg = np.mean(global_forks_count_list)
+        # return ffbi_avg, sbp_avg_by_node_list, global_forks_avg, meeting_percentage, node_ffbi_lists_list
 
     def _run(self, experiment_name=None, iterations=100,
              block_arrivals_per_snapshot=1):
@@ -69,18 +66,19 @@ class Simulator:
     @staticmethod
     def _extract_data_from_logs(logs):
         ffbi_list = []
+        node_ffbi_lists_list = [log.get_ffbi_node_idx_tuple_list() for log in logs]
         for log in logs:
             min_ffbi = min(log.get_ffbi_list(), default=-1)
             if min_ffbi > -1:
                 ffbi_list.append(min_ffbi)
-        meeting_percentage = len(logs) / len(ffbi_list)
+        meeting_percentage = 100 * float(len(ffbi_list)) / float(len(logs))
         sbp_lists_list = [log.get_sbp_lists_list() for log in logs]
         sbp_by_node = [[] for i in range(len(sbp_lists_list[0]))]
         for sbp_list in sbp_lists_list:
             for i in range(len(sbp_list)):
                 sbp_by_node[i].append(sbp_list[i][1])
         global_forks_count_list = [log.get_global_forks_count() for log in logs]
-        return ffbi_list, sbp_by_node, global_forks_count_list, meeting_percentage
+        return ffbi_list, sbp_by_node, global_forks_count_list, meeting_percentage, node_ffbi_lists_list
 
     def _save_data(self, logs, verbose):
         for i, log in enumerate(logs):
